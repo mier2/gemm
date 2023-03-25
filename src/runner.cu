@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iomanip>
+#define CEIL_DIV(M, N) (((M) + (N)-1) / (N))
 
 float get_sec() {
   struct timeval time;
@@ -149,10 +150,58 @@ void runCublasTF32(cublasHandle_t handle, int M, int N, int K, float alpha,
                CUBLAS_COMPUTE_32F_FAST_TF32, CUBLAS_GEMM_DEFAULT_TENSOR_OP);
 }
 
-// void run_sgemm_naive(int M, int N, int K, float alpha, float *A, float *B,
-//                      float beta, float *C) {
-//   dim3 gridDim(CEIL_DIV(M, 32), CEIL_DIV(N, 32));
-//   dim3 blockDim(32, 32);
-//   sgemm_naive<<<gridDim, blockDim>>>(M, N, K, alpha, A, B, beta, C);
-// }
+void run_sgemm_naive(int M, int N, int K, float alpha, float *A, float *B,
+                     float beta, float *C) {
+  dim3 gridDim(CEIL_DIV(M, 32), CEIL_DIV(N, 32));
+  dim3 blockDim(32, 32);
+  sgemm_naive<<<gridDim, blockDim>>>(M, N, K, alpha, A, B, beta, C);
+}
+
+
+void run_kernel(int kernel_num, int M, int N, int K, float alpha, float *A,
+                float *B, float beta, float *C, cublasHandle_t handle) {
+  switch (kernel_num) {
+  case 0:
+    runCublasFP32(handle, M, N, K, alpha, A, B, beta, C);
+    break;
+  case 1:
+    run_sgemm_naive(M, N, K, alpha, A, B, beta, C);
+    break;
+  // case 2:
+  //   run_sgemm_coalesce(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 3:
+  //   run_sgemm_shared_mem_block(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 4:
+  //   runSgemm1DBlocktiling(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 5:
+  //   runSgemm2DBlocktiling(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 6:
+  //   runSgemmVectorize(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 7:
+  //   runSgemmResolveBankConflicts(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 8:
+  //   runSgemmResolveBankExtraCol(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 9:
+  //   runSgemmAutotuned(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 10:
+  //   runSgemmWarptiling(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 11:
+  //   runSgemmDoubleBuffering(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  // case 12:
+  //   runSgemmDoubleBuffering2(M, N, K, alpha, A, B, beta, C);
+  //   break;
+  default:
+    throw std::invalid_argument("Unknown kernel number");
+  }
+}
 
