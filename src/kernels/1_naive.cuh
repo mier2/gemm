@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
+#include <stdio.h>
 
 // A (M*K), B(K*N), C = (M*N)
 // alpha and beta are constant in GEMM equation
@@ -14,6 +15,9 @@ __global__ void sgemm_naive(int M, int N, int K, float alpha,
     // CUDA thread global index
     const uint row = blockIdx.x * blockDim.x + threadIdx.x;
     const uint col = blockIdx.y*blockDim.y + threadIdx.y;
+    //printf("row: %u col: %u", row,col);
+    //printf("threadIdx.x: %u" , threadIdx.x);
+    
 
     if(row < M && col < N){
         float tmp = 0.0;
