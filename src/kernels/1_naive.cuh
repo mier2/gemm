@@ -15,8 +15,8 @@ __global__ void sgemm_naive(int M, int N, int K, float alpha,
     // CUDA thread global index
     const uint row = blockIdx.x * blockDim.x + threadIdx.x;
     const uint col = blockIdx.y*blockDim.y + threadIdx.y;
-    //printf("row: %u col: %u", row,col);
-    //printf("threadIdx.x: %u" , threadIdx.x);
+    //printf("blockIdx.x: %u threadIdx.x: %u \n", blockIdx.x, threadIdx.x);
+    
     
 
     if(row < M && col < N){

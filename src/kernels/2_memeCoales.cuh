@@ -12,6 +12,7 @@ __global__ void sgemm_mem_coalesce(int M, int N, int K, float alpha,
                                     const float *A, const float *B, float beta, float *C){
     const uint row = blockIdx.x * BLOCKSIZE +(threadIdx.x/BLOCKSIZE);
     const uint col = blockIdx.y* BLOCKSIZE +(threadIdx.x%BLOCKSIZE);
+    //printf("blockIdx.x: %u threadIdx.x: %u  row: %u col: %u\n", blockIdx.x, threadIdx.x, row, col);
 
     if(row < M && col < N){
         float tmp = 0.0;
